@@ -25,7 +25,8 @@
         <link rel="stylesheet" href="{{asset('assets/admin/css/sweet-alert.css')}}" />
         @yield('style')
         <style>
-            
+            .content-footer { position: fixed; bottom: 0; width: 100%; z-index: 1000; }
+            .content-wrapper { padding-bottom: 60px; }
         </style>
         
     </head>
@@ -37,8 +38,8 @@
                     @include('admin.layouts.elements.header')
                     <div class="content-wrapper">
                         @yield('content')
-                        @include('admin.layouts.elements.footer')
                         <div class="content-backdrop fade"></div>
+                        @include('admin.layouts.elements.footer')
                     </div>
                     @include('admin.layouts.elements.right_sidebar')
                 </div>
