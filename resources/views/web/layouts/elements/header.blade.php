@@ -1,22 +1,23 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-   
-    <div class="container-fluid">
-        
-        <a class="navbar-brand mt-2 mt-lg-0" href="#">
-            <h5 class="pt-1">{{ config('app.name') }}</h5>
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url('/') }}">
+            {{ config('app.name') }}
         </a>
-        
-        <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="fas fa-bars"></i>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
         </button>
-        
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <div class="d-flex align-items-center justify-content-start">
-                
-            </div>
-            
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('web.orders.*') ? 'active' : '' }}" href="{{ route('web.orders.index') }}">Orders</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('web.orders.create') ? 'active' : '' }}" href="{{ route('web.orders.create') }}">Create Order</a>
+                </li>
+            </ul>
         </div>
-       
     </div>
-   
 </nav>

@@ -1,7 +1,5 @@
-<footer class="bg-primary text-center text-white fixed-bottom">
-    <div class="text-center p-3">
-        © <script>document.write(new Date().getFullYear())</script> Copyright:
-        <a class="text-white" href="javascript:void">{{ config('app.name') }}</a>
+<footer class="bg-primary text-white text-center py-3 mt-5">
+    <div class="container">
+        <p class="mb-0">&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
     </div>
-    <!-- Copyright -->
 </footer>

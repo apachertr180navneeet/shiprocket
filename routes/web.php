@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\OrderController;
 use App\Http\Controllers\Admin\AdminAuthController;
 
 /*
@@ -51,8 +52,15 @@ Route::name('admin.')->prefix('admin')->group(function () {
 
 });
 
-Route::middleware(['auth'])->group(function () {
-
+Route::name('web.')->prefix('orders')->group(function () {
+    Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/create', [OrderController::class, 'create'])->name('orders.create');
+    Route::post('/', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+    Route::put('/{id}', [OrderController::class, 'update'])->name('orders.update');
+    Route::put('/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::delete('/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
 });
 
 
