@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\OrderController;
 use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,16 @@ Route::name('admin.')->prefix('admin')->group(function () {
 
         Route::post('profile', [AdminAuthController::class, 'updateAdminProfile'])->name('update.profile');
 
+        Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::put('orders/{id}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+        Route::put('orders/{id}/payment-status', [AdminOrderController::class, 'updatePaymentStatus'])->name('orders.updatePaymentStatus');
+        Route::post('orders/{id}/shipment', [AdminOrderController::class, 'addShipment'])->name('orders.addShipment');
+        Route::post('orders/{id}/pickup', [AdminOrderController::class, 'schedulePickup'])->name('orders.pickup');
+        Route::get('orders/{id}/label', [AdminOrderController::class, 'generateLabel'])->name('orders.label');
+        Route::get('orders/{id}/invoice', [AdminOrderController::class, 'generateInvoice'])->name('orders.invoice');
+        Route::get('orders/{id}/track', [AdminOrderController::class, 'track'])->name('orders.track');
+
     });
 
 });
@@ -57,9 +68,9 @@ Route::name('web.')->prefix('orders')->group(function () {
     Route::get('/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/{id}/track', [OrderController::class, 'track'])->name('orders.track');
     Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('orders.edit');
     Route::put('/{id}', [OrderController::class, 'update'])->name('orders.update');
-    Route::put('/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::delete('/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
 });
 

@@ -15,11 +15,12 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable ,SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    protected $fillable = [
+        'first_name', 'last_name', 'full_name', 'slug', 'email', 'phone',
+        'password', 'address', 'area', 'city', 'state', 'country',
+        'country_code', 'zipcode', 'latitude', 'longitude', 'bio',
+        'device_type', 'device_token', 'avatar', 'role', 'status',
+    ];
 
     protected $appends = ['avatar_full_path'];
 

@@ -32,6 +32,7 @@
                                 <th>Total</th>
                                 <th>Status</th>
                                 <th>Payment</th>
+                                <th>Tracking</th>
                                 <th>Date</th>
                                 <th>Actions</th>
                             </tr>
@@ -42,7 +43,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $order->order_number }}</td>
                                 <td>{{ $order->user->full_name ?? 'N/A' }}</td>
-                                <td>${{ number_format($order->total_amount, 2) }}</td>
+                                <td>₹{{ number_format($order->total_amount, 2) }}</td>
                                 <td>
                                     <span class="badge bg-{{ $order->status == 'completed' ? 'success' : ($order->status == 'cancelled' ? 'danger' : ($order->status == 'processing' ? 'warning' : 'secondary')) }}">
                                         {{ ucfirst($order->status) }}
@@ -53,14 +54,28 @@
                                         {{ ucfirst($order->payment_status) }}
                                     </span>
                                 </td>
+                                <td>
+                                    @if($order->awb_number)
+                                        <span class="badge bg-success small">{{ $order->awb_number }}</span>
+                                        <br><small class="text-muted">{{ $order->shipment_carrier }}</small>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td>{{ $order->created_at->format('d M Y') }}</td>
                                 <td>
                                     <a href="{{ route('web.orders.show', $order->id) }}" class="btn btn-sm btn-info">View</a>
                                     <a href="{{ route('web.orders.edit', $order->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    @if($order->status !== 'cancelled' && $order->status !== 'completed')
+                                    <form action="{{ route('web.orders.destroy', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Cancel this order?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                    </form>
+                                    @endif
                                 </td>
                             </tr>
                             @empty
-                            <tr><td colspan="8" class="text-center py-3">No orders found</td></tr>
+                            <tr><td colspan="9" class="text-center py-3">No orders found</td></tr>
                             @endforelse
                         </tbody>
                     </table>

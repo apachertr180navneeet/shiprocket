@@ -11,7 +11,14 @@ class Order extends Model
 
     protected $fillable = [
         'user_id', 'order_number', 'total_amount', 'status',
-        'shipping_address', 'payment_status', 'notes'
+        'shipping_address', 'payment_status', 'notes',
+        'shipment_tracking', 'shipment_carrier', 'shipped_at',
+        'shiprocket_order_id', 'shiprocket_shipment_id', 'awb_number', 'shiprocket_response',
+    ];
+
+    protected $casts = [
+        'shiprocket_response' => 'array',
+        'shipped_at' => 'datetime',
     ];
 
     public function user()

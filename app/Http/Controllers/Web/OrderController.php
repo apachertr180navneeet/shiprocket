@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Services\ShipRocketService;
 use DB, Helper;
 
 class OrderController extends Controller
@@ -19,15 +20,17 @@ class OrderController extends Controller
 
     public function create()
     {
-        $users = User::where('role', 'user')->where('status', 'active')->get();
-        return view('web.order.create', compact('users'));
+        return view('web.order.create');
     }
 
     public function store(Request $request)
     {
         $data = $request->all();
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email',
+            'phone' => 'sometimes|string',
             'items' => 'required|array|min:1',
             'items.*.product_name' => 'required|string',
             'items.*.quantity' => 'required|integer|min:1',
@@ -44,8 +47,27 @@ class OrderController extends Controller
                 $total_amount += $item['price'] * $item['quantity'];
             }
 
+            $user = User::where('email', $data['email'])->first();
+            if (!$user) {
+                $full_name = $data['first_name'] . ' ' . $data['last_name'];
+                $user = User::create([
+                    'first_name' => $data['first_name'],
+                    'last_name' => $data['last_name'],
+                    'full_name' => $full_name,
+                    'slug' => Helper::slug('users', $full_name),
+                    'email' => $data['email'],
+                    'phone' => $data['phone'] ?? '',
+                    'password' => bcrypt('password'),
+                    'country_code' => '1',
+                    'country' => 'India',
+                    'address' => $data['shipping_address'],
+                    'role' => 'user',
+                    'status' => 'active',
+                ]);
+            }
+
             $order = Order::create([
-                'user_id' => $data['user_id'],
+                'user_id' => $user->id,
                 'order_number' => $order_number,
                 'total_amount' => $total_amount,
                 'shipping_address' => $data['shipping_address'],
@@ -99,23 +121,52 @@ class OrderController extends Controller
         return redirect()->route('web.orders.index')->with('success', 'Order updated successfully');
     }
 
-    public function updateStatus(Request $request, $id)
+    public function track($id)
     {
-        $order = Order::findOrFail($id);
-        $request->validate(['status' => 'required|in:pending,processing,completed,cancelled']);
+        $order = Order::with('user', 'items')->findOrFail($id);
 
-        $order->status = $request->status;
-        $order->save();
+        if (!$order->awb_number) {
+            return response()->json(['error' => 'No tracking number available'], 404);
+        }
 
-        return redirect()->route('web.orders.index')->with('success', 'Order status updated successfully');
+        try {
+            $shiprocket = app(ShipRocketService::class);
+            $data = $shiprocket->trackShipment(null, $order->awb_number);
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function destroy($id)
     {
         $order = Order::findOrFail($id);
-        $order->status = 'cancelled';
-        $order->save();
 
-        return redirect()->route('web.orders.index')->with('success', 'Order cancelled successfully');
+        if ($order->status === 'cancelled') {
+            return redirect()->route('web.orders.show', $id)->with('error', 'Order is already cancelled');
+        }
+
+        if ($order->status === 'completed') {
+            return redirect()->route('web.orders.show', $id)->with('error', 'Completed orders cannot be cancelled');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            if ($order->shiprocket_order_id || $order->awb_number) {
+                $shiprocket = app(ShipRocketService::class);
+                $shiprocket->cancelOrder($order->order_number);
+            }
+
+            $order->status = 'cancelled';
+            $order->payment_status = 'refunded';
+            $order->save();
+            DB::commit();
+
+            return redirect()->route('web.orders.index')->with('success', 'Order cancelled and payment refunded');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->route('web.orders.show', $id)->with('error', 'Cancellation failed: ' . $e->getMessage());
+        }
     }
 }

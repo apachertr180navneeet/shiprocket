@@ -64,6 +64,12 @@
 			</a>
 		</li>
 
-		
+		<li class="menu-item {{ request()->is('admin/orders*') ? 'active' : ''}}">
+			<a href="{{route('admin.orders.index')}}" class="menu-link">
+				<i class="menu-icon tf-icons bx bx-cart"></i>
+				<div data-i18n="Orders">Orders</div>
+			</a>
+		</li>
+
 	</ul>
 </aside>
